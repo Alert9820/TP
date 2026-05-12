@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Website UI Content Reviewer — AI Powered</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F2EFE9;
+      --ink: #1A1916;
+      --card: #FFFFFF;
+      --accent: #E8FF47;
+      --accent2: #FF4F1F;
+      --muted: #8A8880;
+      --border: #E0DDD6;
+      --good: #22C55E;
+      --warn: #F59E0B;
+      --bad: #EF4444;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 48px;
+    }
+    .logo-block h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .logo-block h1 em {
+      font-style: normal;
+      background: var(--accent);
+      padding: 0 6px;
+      border-radius: 4px;
+    }
+    .logo-block p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--ink);
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 6px 12px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+    }
+    .badge::before { content: '▲'; font-size: 0.5rem; }
+
+    /* INPUT CARD */
+    .input-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    }
+
+    .input-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .url-row {
+      display: flex; gap: 10px; align-items: stretch;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      background: var(--bg);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .url-input:focus { border-color: var(--ink); }
+    .url-input::placeholder { color: var(--muted); }
+
+    .analyze-btn {
+      padding: 14px 24px;
+      background: var(--ink);
+      color: var(--accent);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      letter-spacing: 0.03em;
+    }
+    .analyze-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .hint strong { color: var(--ink); }
+
+    /* LOADING */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 48px 32px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+    .loading-state.visible { display: block; }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-steps { list-style: none; text-align: left; display: inline-block; margin-top: 16px; }
+    .loading-steps li {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 4px 0;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .loading-steps li.done { color: var(--good); }
+    .loading-steps li.done::before { content: '✓'; }
+    .loading-steps li.active { color: var(--ink); font-weight: 700; }
+    .loading-steps li.active::before { content: '▶'; }
+    .loading-steps li.pending::before { content: '○'; }
+
+    /* RESULTS */
+    #results { display: none; }
+    #results.visible { display: block; animation: fadeUp 0.4s ease; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Score bar */
+    .score-banner {
+      background: var(--ink);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px;
+    }
+    .score-left h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .score-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .score-num span { font-size: 1.5rem; color: var(--muted); }
+    .score-label { font-size: 0.875rem; color: #aaa; margin-top: 6px; }
+
+    .score-ring {
+      width: 100px; height: 100px;
+      position: relative; flex-shrink: 0;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 8; }
+    .ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      transition: stroke-dashoffset 1.5s ease;
+    }
+
+    /* Section cards */
+    .result-section {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+    .section-header:hover { background: var(--bg); }
+
+    .section-title {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .section-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .section-score {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .score-pill {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .score-pill.good { background: rgba(34,197,94,0.12); color: var(--good); }
+    .score-pill.warn { background: rgba(245,158,11,0.12); color: var(--warn); }
+    .score-pill.bad { background: rgba(239,68,68,0.12); color: var(--bad); }
+
+    .chevron {
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: transform 0.3s ease;
+    }
+    .chevron.open { transform: rotate(180deg); }
+
+    .section-body {
+      display: none;
+      padding: 0 24px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .section-body.open { display: block; }
+
+    .finding {
+      display: flex; gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .finding:last-child { border-bottom: none; }
+
+    .finding-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .finding-dot.good { background: var(--good); }
+    .finding-dot.warn { background: var(--warn); }
+    .finding-dot.bad { background: var(--bad); }
+
+    .finding-content {}
+    .finding-type {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    .finding-text { font-size: 0.875rem; line-height: 1.55; color: var(--ink); }
+    .finding-suggest {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .finding-suggest strong { color: var(--good); font-style: normal; }
+
+    /* Summary box */
+    .summary-box {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+    .summary-box h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .summary-text { font-size: 0.95rem; line-height: 1.7; color: var(--ink); }
+
+    /* Actions */
+    .action-row {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .action-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--ink);
+    }
+    .action-btn:hover { background: var(--ink); color: var(--accent); border-color: var(--ink); }
+    .action-btn.primary { background: var(--ink); color: var(--accent); border-color: var(--ink); }
+
+    /* Error */
+    .error-card {
+      display: none;
+      background: rgba(239,68,68,0.06);
+      border: 1.5px solid rgba(239,68,68,0.2);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .error-card.visible { display: block; }
+    .error-card h3 { color: var(--bad); font-family: 'Space Mono', monospace; margin-bottom: 8px; }
+    .error-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      .url-row { flex-direction: column; }
+      .score-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-block">
+      <h1>UI Content<br><em>Reviewer</em></h1>
+      <p>Paste any URL. Get an instant AI content audit.</p>
+    </div>
+    <div class="badge">AI Powered</div>
+  </header>
+
+  <!-- INPUT -->
+  <div class="input-card">
+    <label class="input-label" for="urlInput">Website URL to Review</label>
+    <div class="url-row">
+      <input
+        type="text"
+        id="urlInput"
+        class="url-input"
+        placeholder="https://funngro.com"
+        value=""
+      />
+      <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
+        Analyze →
+      </button>
+    </div>
+    <p class="hint">Enter the full URL. AI will review: <strong>clarity · consistency · flow · improvements</strong></p>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <p style="font-family:'Space Mono',monospace; font-size:0.8rem; color:#666;">Analyzing website content…</p>
+    <ul class="loading-steps" id="loadingSteps">
+      <li class="active" id="step1">Fetching website content</li>
+      <li class="pending" id="step2">Parsing text & UI elements</li>
+      <li class="pending" id="step3">Running clarity analysis</li>
+      <li class="pending" id="step4">Checking consistency & flow</li>
+      <li class="pending" id="step5">Generating suggestions</li>
+    </ul>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-card" id="errorCard">
+    <h3>⚠ Analysis Failed</h3>
+    <p id="errorMsg">Something went wrong. Please check the URL and try again.</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="score-banner">
+      <div class="score-left">
+        <h2>Overall Content Score</h2>
+        <div class="score-num" id="scoreNum">—<span>/100</span></div>
+        <div class="score-label" id="scoreLabel">—</div>
+      </div>
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100" width="100" height="100">
+          <circle class="ring-bg" cx="50" cy="50" r="45"/>
+          <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="45"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <h3>Executive Summary</h3>
+      <div class="summary-text" id="summaryText">—</div>
+    </div>
+
+    <div id="sectionsContainer"></div>
+
+    <div class="action-row">
+      <button class="action-btn primary" onclick="copyReport()">📋 Copy Full Report</button>
+      <button class="action-btn" onclick="resetTool()">↩ Analyze Another URL</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let lastReport = '';
+
+  async function startAnalysis() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { alert('Please enter a URL first!'); return; }
+
+    const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+
+    // Reset UI
+    document.getElementById('results').classList.remove('visible');
+    document.getElementById('errorCard').classList.remove('visible');
+    document.getElementById('loadingState').classList.add('visible');
+    document.getElementById('analyzeBtn').disabled = true;
+    resetSteps();
+
+    // Animate loading steps
+    const steps = ['step1','step2','step3','step4','step5'];
+    let si = 0;
+    const stepInterval = setInterval(() => {
+      if (si > 0) {
+        document.getElementById(steps[si-1]).className = 'done';
+      }
+      if (si < steps.length) {
+        document.getElementById(steps[si]).className = 'active';
+        si++;
+      } else {
+        clearInterval(stepInterval);
+      }
+    }, 900);
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `You are a professional UX content reviewer. The user gives a website URL and you review it based on your knowledge of that website.
+
+CRITICAL: Reply with ONLY a raw JSON object. No text before or after. No markdown. No backticks. Start your response with { and end with }.
+
+Use exactly this structure:
+{"score":75,"scoreLabel":"Good","summary":"Your summary here.","sections":[{"title":"Clarity","icon":"🔍","score":70,"findings":[{"type":"good","text":"Finding here.","suggestion":"Suggestion here."},{"type":"issue","text":"Another finding.","suggestion":"Fix suggestion."}]},{"title":"Consistency","icon":"🎯","score":80,"findings":[{"type":"good","text":"Finding.","suggestion":"Suggestion."},{"type":"warning","text":"Finding.","suggestion":"Suggestion."}]},{"title":"Content Flow","icon":"🌊","score":75,"findings":[{"type":"good","text":"Finding.","suggestion":"Suggestion."},{"type":"issue","text":"Finding.","suggestion":"Suggestion."}]},{"title":"Improvement Suggestions","icon":"💡","score":65,"findings":[{"type":"warning","text":"Finding.","suggestion":"Suggestion."},{"type":"issue","text":"Finding.","suggestion":"Suggestion."}]}]}
+
+Rules:
+- type must be exactly: "good", "issue", or "warning"
+- suggestion must be a string (never null)
+- Give exactly 3 findings per section
+- Keep each text and suggestion under 100 characters
+- No apostrophes in strings, use simple words`,
+          messages: [
+            {
+              role: "user",
+              content: `Review this website: ${fullUrl}`
+            }
+          ]
+        })
+      });
+
+      clearInterval(stepInterval);
+      steps.forEach(s => document.getElementById(s).className = 'done');
+
+      const data = await response.json();
+
+      if (data.error) throw new Error(data.error.message || 'API error');
+
+      const rawText = (data.content || [])
+        .filter(b => b.type === 'text')
+        .map(b => b.text)
+        .join('');
+
+      // Extract the JSON object robustly
+      const start = rawText.indexOf('{');
+      const end = rawText.lastIndexOf('}');
+      if (start === -1 || end === -1) throw new Error('No JSON in response');
+      const jsonStr = rawText.slice(start, end + 1);
+      const report = JSON.parse(jsonStr);
+
+      lastReport = JSON.stringify(report, null, 2);
+
+      renderResults(report);
+
+    } catch (err) {
+      clearInterval(stepInterval);
+      document.getElementById('loadingState').classList.remove('visible');
+      document.getElementById('errorCard').classList.add('visible');
+      document.getElementById('errorMsg').textContent =
+        'Could not analyze this URL. Make sure it\'s a public website and try again. (' + err.message + ')';
+    } finally {
+      document.getElementById('analyzeBtn').disabled = false;
+      document.getElementById('loadingState').classList.remove('visible');
+    }
+  }
+
+  function renderResults(report) {
+    // Score
+    document.getElementById('scoreNum').innerHTML = `${report.score}<span>/100</span>`;
+    document.getElementById('scoreLabel').textContent = report.scoreLabel;
+    document.getElementById('summaryText').textContent = report.summary;
+
+    // Animate ring
+    const pct = report.score / 100;
+    const offset = 283 - (283 * pct);
+    setTimeout(() => {
+      document.getElementById('ringFill').style.strokeDashoffset = offset;
+      // Color based on score
+      const ring = document.getElementById('ringFill');
+      if (report.score >= 75) ring.style.stroke = '#22C55E';
+      else if (report.score >= 50) ring.style.stroke = '#F59E0B';
+      else ring.style.stroke = '#EF4444';
+    }, 200);
+
+    // Sections
+    const container = document.getElementById('sectionsContainer');
+    container.innerHTML = '';
+
+    report.sections.forEach((sec, i) => {
+      const scoreClass = sec.score >= 75 ? 'good' : sec.score >= 50 ? 'warn' : 'bad';
+      const iconBg = sec.score >= 75 ? 'rgba(34,197,94,0.1)' : sec.score >= 50 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)';
+
+      const findingsHTML = sec.findings.map(f => {
+        const dotClass = f.type === 'good' ? 'good' : f.type === 'warning' ? 'warn' : 'bad';
+        const typeLabel = f.type === 'good' ? 'POSITIVE' : f.type === 'warning' ? 'WARNING' : 'ISSUE';
+        const suggest = f.suggestion ? `<div class="finding-suggest"><strong>→ Suggestion:</strong> ${f.suggestion}</div>` : '';
+        return `
+          <div class="finding">
+            <div class="finding-dot ${dotClass}"></div>
+            <div class="finding-content">
+              <div class="finding-type">${typeLabel}</div>
+              <div class="finding-text">${f.text}</div>
+              ${suggest}
+            </div>
+          </div>`;
+      }).join('');
+
+      const div = document.createElement('div');
+      div.className = 'result-section';
+      div.innerHTML = `
+        <div class="section-header" onclick="toggleSection(this)">
+          <div class="section-title">
+            <div class="section-icon" style="background:${iconBg}">${sec.icon}</div>
+            ${sec.title}
+          </div>
+          <div class="section-score">
+            <span class="score-pill ${scoreClass}">${sec.score}/100</span>
+            <span class="chevron" id="chev${i}">▼</span>
+          </div>
+        </div>
+        <div class="section-body" id="body${i}">
+          ${findingsHTML}
+        </div>`;
+      container.appendChild(div);
+    });
+
+    // Open first section
+    document.querySelector('.section-body')?.classList.add('open');
+    document.querySelector('.chevron')?.classList.add('open');
+
+    document.getElementById('results').classList.add('visible');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+
+  function resetSteps() {
+    ['step1','step2','step3','step4','step5'].forEach((id, i) => {
+      document.getElementById(id).className = i === 0 ? 'active' : 'pending';
+    });
+  }
+
+  function resetTool() {
+    document.getElementById('results').classList.remove('visible');
+    document.getElementById('urlInput').value = '';
+    document.getElementById('urlInput').focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function copyReport() {
+    if (!lastReport) return;
+    navigator.clipboard.writeText(lastReport).then(() => {
+      const btn = document.querySelector('.action-btn.primary');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = '📋 Copy Full Report', 2000);
+    });
+  }
+
+  // Enter key support
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('urlInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') startAnalysis();
+    });
+  });
+</script>
+</body>
+</html>

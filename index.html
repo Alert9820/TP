@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sunny — Data Analyst</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════
@@ -591,6 +592,17 @@ footer{
 ═══════════════════════════════════════════ */
 @keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* cert locked state */
+.cert-locked{opacity:.55;cursor:default !important;}
+.cert-locked:hover{transform:none !important;border-color:var(--border) !important;background:var(--glass) !important;box-shadow:none !important;}
+.cert-badge-soon{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:14px;padding:3px 10px;border-radius:100px;
+  background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);
+  font-size:.6rem;color:var(--amber);font-family:'JetBrains Mono',monospace;letter-spacing:.06em;
+}
 
 /* ═══════════════════════════════════════════
    RESPONSIVE
@@ -932,50 +944,69 @@ footer{
   <div class="sec-title reveal">Verified skills,<br>real credentials.</div>
   <div class="certs-grid reveal">
 
-    <!-- ✏️ REPLACE href WITH YOUR CERTIFICATE VERIFY URL (Coursera / Credly etc.) -->
-    <a class="cert-card" href="YOUR_GOOGLE_DA_CERT_URL" target="_blank">
+    <!--
+    ╔══════════════════════════════════════════════════════╗
+    ║  CERTIFICATES — HOW TO ACTIVATE A CARD:             ║
+    ║  1. Change  data-locked="true"  →  data-locked="false"  ║
+    ║  2. Replace  data-url="#"  with your certificate URL ║
+    ║  That's it! The card becomes clickable automatically ║
+    ╚══════════════════════════════════════════════════════╝
+    -->
+
+    <div class="cert-card-wrap"
+         data-locked="false"
+         data-url="YOUR_GOOGLE_DA_CERT_URL">
       <span class="cert-emoji">📊</span>
       <div class="cert-issuer">Google · Coursera</div>
       <div class="cert-name">Google Data Analytics Professional Certificate</div>
-      <div class="cert-date">March 2025</div>
-      <div class="cert-badge">✓ Verified</div>
-    </a>
+      <div class="cert-date">2025</div>
+      <div class="cert-badge cert-badge-live">✓ Verified</div>
+      <div class="cert-badge cert-badge-soon" style="display:none">⏳ Link Soon</div>
+    </div>
 
-    <!-- ✏️ REPLACE href WITH YOUR CERTIFICATE VERIFY URL -->
-    <a class="cert-card" href="YOUR_IBM_PYTHON_CERT_URL" target="_blank">
+    <div class="cert-card-wrap"
+         data-locked="false"
+         data-url="YOUR_IBM_PYTHON_CERT_URL">
       <span class="cert-emoji">🐍</span>
       <div class="cert-issuer">IBM · Coursera</div>
       <div class="cert-name">Python for Data Science & AI</div>
-      <div class="cert-date">January 2025</div>
-      <div class="cert-badge">✓ Verified</div>
-    </a>
+      <div class="cert-date">2025</div>
+      <div class="cert-badge cert-badge-live">✓ Verified</div>
+      <div class="cert-badge cert-badge-soon" style="display:none">⏳ Link Soon</div>
+    </div>
 
-    <!-- ✏️ REPLACE href WITH YOUR CERTIFICATE VERIFY URL -->
-    <a class="cert-card" href="YOUR_ML_SPECIALIZATION_CERT_URL" target="_blank">
+    <div class="cert-card-wrap"
+         data-locked="false"
+         data-url="YOUR_ML_SPECIALIZATION_CERT_URL">
       <span class="cert-emoji">🤖</span>
       <div class="cert-issuer">Stanford · DeepLearning.AI</div>
       <div class="cert-name">Machine Learning Specialization</div>
-      <div class="cert-date">August 2025</div>
-      <div class="cert-badge">✓ Verified</div>
-    </a>
+      <div class="cert-date">2025</div>
+      <div class="cert-badge cert-badge-live">✓ Verified</div>
+      <div class="cert-badge cert-badge-soon" style="display:none">⏳ Link Soon</div>
+    </div>
 
-    <!-- ✏️ REPLACE href WITH YOUR CERTIFICATE VERIFY URL -->
-    <a class="cert-card" href="YOUR_POWERBI_CERT_URL" target="_blank">
+    <div class="cert-card-wrap"
+         data-locked="false"
+         data-url="YOUR_POWERBI_CERT_URL">
       <span class="cert-emoji">⚡</span>
       <div class="cert-issuer">Microsoft</div>
       <div class="cert-name">Power BI Data Analyst Associate</div>
-      <div class="cert-date">June 2025</div>
-      <div class="cert-badge">✓ Verified</div>
-    </a>
+      <div class="cert-date">2025</div>
+      <div class="cert-badge cert-badge-live">✓ Verified</div>
+      <div class="cert-badge cert-badge-soon" style="display:none">⏳ Link Soon</div>
+    </div>
 
-    <!-- ✏️ REPLACE href WITH YOUR CERTIFICATE VERIFY URL -->
-    <a class="cert-card" href="YOUR_SQL_CERT_URL" target="_blank">
+    <div class="cert-card-wrap"
+         data-locked="false"
+         data-url="YOUR_SQL_CERT_URL">
       <span class="cert-emoji">🗄️</span>
       <div class="cert-issuer">Mode Analytics</div>
       <div class="cert-name">SQL for Data Analytics</div>
-      <div class="cert-date">November 2024</div>
-      <div class="cert-badge">✓ Verified</div>
-    </a>
+      <div class="cert-date">2024</div>
+      <div class="cert-badge cert-badge-live">✓ Verified</div>
+      <div class="cert-badge cert-badge-soon" style="display:none">⏳ Link Soon</div>
+    </div>
 
     <div class="cert-card cert-add" style="cursor:default;">
       <div class="cert-add-icon">＋</div>
@@ -994,10 +1025,9 @@ footer{
       <div class="cl-title">Got a role?<br>Let's talk.</div>
       <div class="cl-sub">Actively looking for Data Analyst, Python Dev, and ML/AI roles — Mumbai or remote. If you need someone who ships work, not just resumes, reach out.</div>
       <div class="contact-links">
-        <!-- ✏️ REPLACE with your actual email -->
-        <a class="clink" href="mailto:YOUR_EMAIL_HERE">
+        <a class="clink" href="mailto:sunnychaurashiya76@gmail.com">
           <div class="clink-icon">✉</div>
-          <span class="clink-label">YOUR_EMAIL_HERE</span>
+          <span class="clink-label">sunnychaurashiya76@gmail.com</span>
         </a>
         <a class="clink" href="https://www.linkedin.com/in/sunny-chaurasiya-1507a7319" target="_blank">
           <div class="clink-icon">in</div>
@@ -1058,6 +1088,23 @@ footer{
 </footer>
 
 <script>
+/* ── EMAILJS INIT ──
+   SETUP (one-time, free):
+   1. Go to https://www.emailjs.com → Sign up free
+   2. Add a Gmail service → copy your SERVICE_ID
+   3. Create an Email Template with these variables:
+      {{from_name}}, {{from_email}}, {{company}}, {{role}}, {{message}}
+      Set "To Email" = sunnychaurashiya76@gmail.com
+      Copy your TEMPLATE_ID
+   4. Go to Account → API Keys → copy your PUBLIC_KEY
+   5. Paste all three below
+*/
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz456'
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // e.g. 'aBcDeFgHiJkLmNoP'
+
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
 /* ── CURSOR ── */
 const cur = document.getElementById('cur');
 const ring = document.getElementById('cur-ring');
@@ -1121,19 +1168,102 @@ document.addEventListener('mousemove', e => {
   document.querySelector('.orb3').style.transform = `translate(${mx * .4}px,${my * .4}px)`;
 });
 
-/* ── CONTACT FORM ── */
-function sendMsg() {
-  const n = document.getElementById('fn').value.trim();
-  const em = document.getElementById('fe').value.trim();
-  const msg = document.getElementById('fm').value.trim();
-  if (!n || !em || !msg) { alert('Please fill name, email and message.'); return; }
-  const btn = document.getElementById('fsub');
+/* ── CERTIFICATE CARDS — auto build from data-locked / data-url ── */
+document.querySelectorAll('.cert-card-wrap').forEach(div => {
+  const locked = div.dataset.locked === 'true';
+  const url    = div.dataset.url;
+  const liveBadge = div.querySelector('.cert-badge-live');
+  const soonBadge = div.querySelector('.cert-badge-soon');
+
+  if (locked || !url || url.startsWith('YOUR_')) {
+    // Show as "coming soon" — non-clickable card
+    div.classList.add('cert-card', 'cert-locked');
+    if (liveBadge) liveBadge.style.display = 'none';
+    if (soonBadge) soonBadge.style.display = 'inline-flex';
+    div.title = 'Certificate link coming soon';
+  } else {
+    // Fully active — wrap in <a> and open on click
+    div.classList.add('cert-card');
+    div.style.cursor = 'none';
+    div.addEventListener('click', () => window.open(url, '_blank'));
+    div.addEventListener('mouseenter', () => div.style.borderColor = 'var(--border-hv)');
+    div.addEventListener('mouseleave', () => div.style.borderColor = '');
+    if (soonBadge) soonBadge.style.display = 'none';
+    if (liveBadge) liveBadge.style.display = 'inline-flex';
+    // show ↗ arrow
+    div.style.position = 'relative';
+    const arrow = document.createElement('span');
+    arrow.textContent = '↗';
+    arrow.style.cssText = 'position:absolute;top:16px;right:16px;font-size:.9rem;color:var(--txt-3);transition:color .2s,transform .2s;';
+    div.prepend(arrow);
+    div.addEventListener('mouseenter', () => { arrow.style.color='var(--indigo)'; arrow.style.transform='translate(2px,-2px)'; });
+    div.addEventListener('mouseleave', () => { arrow.style.color='var(--txt-3)'; arrow.style.transform=''; });
+  }
+});
+
+/* ── CONTACT FORM — EmailJS ── */
+async function sendMsg() {
+  const name    = document.getElementById('fn').value.trim();
+  const company = document.getElementById('fc').value.trim();
+  const email   = document.getElementById('fe').value.trim();
+  const role    = document.getElementById('fr').value;
+  const message = document.getElementById('fm').value.trim();
+  const btn     = document.getElementById('fsub');
+
+  if (!name || !email || !message) {
+    shakeBtn(btn);
+    return;
+  }
+
+  // Check if EmailJS is configured
+  if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+    btn.textContent = '⚠ Setup EmailJS first — see code comments';
+    btn.style.background = 'rgba(251,191,36,.15)';
+    btn.style.color = 'var(--amber)';
+    btn.style.border = '1px solid rgba(251,191,36,.3)';
+    setTimeout(() => {
+      btn.textContent = 'Send Message →';
+      btn.style = '';
+      btn.disabled = false;
+    }, 3000);
+    return;
+  }
+
   btn.textContent = 'Sending...';
   btn.disabled = true;
-  setTimeout(() => {
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      from_name:  name,
+      from_email: email,
+      company:    company || 'Not specified',
+      role:       role    || 'Not specified',
+      message:    message,
+      to_email:   'sunnychaurashiya76@gmail.com',
+    });
     btn.textContent = '✓ Message Sent!';
     btn.classList.add('sent');
-  }, 1100);
+    // clear form
+    ['fn','fc','fe','fm'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fr').selectedIndex = 0;
+  } catch (err) {
+    console.error('EmailJS error:', err);
+    btn.textContent = '✗ Failed — try again';
+    btn.style.background = 'rgba(251,113,133,.15)';
+    btn.style.color = 'var(--rose)';
+    btn.style.border = '1px solid rgba(251,113,133,.3)';
+    btn.disabled = false;
+    setTimeout(() => {
+      btn.textContent = 'Send Message →';
+      btn.style = '';
+    }, 3000);
+  }
+}
+
+function shakeBtn(btn) {
+  btn.style.animation = 'shake .4s ease';
+  btn.textContent = '⚠ Fill required fields';
+  setTimeout(() => { btn.style.animation=''; btn.textContent='Send Message →'; }, 1500);
 }
 </script>
 </body>
